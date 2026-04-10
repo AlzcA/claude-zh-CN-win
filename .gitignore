@@ -1,0 +1,25 @@
+node_modules/
+dist/
+*.js.map
+*.tsbuildinfo
+.DS_Store
+*.log
+*.tgz
+
+# Work files (batch instructions, diagnostics, temp scripts)
+*-instructions.md
+*-diagnose.md
+baseline-report.md
+context-check.md
+translation-gaps*.md
+ui-strings-report.md
+p2-*.md
+zh-CN-sync-instructions.md
+tool-labels-scan.md
+extract-ui-strings.mjs
+find-translation-gaps.mjs
+scripts/add-round2.cjs
+scripts/p2-filter.mjs
+/tmp/
+*.backup
+CHATCC/

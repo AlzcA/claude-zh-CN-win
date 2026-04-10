@@ -1,0 +1,58 @@
+{
+  "name": "claude-code-i18n",
+  "version": "1.1.0",
+  "description": "Internationalize Claude Code - Make the entire CLI interface available in any language",
+  "type": "module",
+  "bin": {
+    "cc-i18n": "./dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "src/translations/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run lint && npm test && npm run build"
+  },
+  "keywords": [
+    "claude-code",
+    "i18n",
+    "internationalization",
+    "chinese",
+    "localization",
+    "cli",
+    "translation",
+    "claude",
+    "anthropic"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AlzcA/claude-zh-CN-win"
+  },
+  "homepage": "https://github.com/AlzcA/claude-zh-CN-win#readme",
+  "dependencies": {
+    "@inquirer/prompts": "^8.3.2",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "fs-extra": "^11.3.0",
+    "ora": "^9.3.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.9",
+    "@types/node": "^22.13.10",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

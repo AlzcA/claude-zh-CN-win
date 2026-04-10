@@ -1,0 +1,102 @@
+{
+  "_comment": "Skill/command description translations for zh-TW. Key = exact English description, Value = Chinese translation.",
+
+  "superpowers": {
+    "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.": "任何創造性工作前必須使用 — 建功能、建元件、加功能、改行為。先探索意圖、需求和設計再動手。",
+    "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies": "當有 2 個以上獨立任務、不需共享狀態或順序依賴時使用",
+    "Use when you have a written implementation plan to execute in a separate session with review checkpoints": "當有書面實作計畫、需在獨立會話中執行並設審查檢查點時使用",
+    "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup": "實作完成、測試通過後，決定如何整合工作 — 提供合併、PR、清理等結構化選項",
+    "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation": "收到代碼審查回饋時使用 — 要求技術嚴謹和驗證，不盲目同意或照做",
+    "Use when completing tasks, implementing major features, or before merging to verify work meets requirements": "完成任務、實作主要功能、或合併前驗證工作符合需求時使用",
+    "Use when executing implementation plans with independent tasks in the current session": "在當前會話中執行有獨立任務的實作計畫時使用",
+    "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes": "遇到任何 bug、測試失敗或非預期行為時，先用這個再提修復方案",
+    "Use when implementing any feature or bugfix, before writing implementation code": "實作任何功能或修 bug 前，先寫測試再寫程式碼",
+    "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification": "需要從當前工作區隔離的功能開發、或執行實作計畫前使用 — 建立隔離的 Git 工作樹",
+    "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions": "任何對話開始時使用 — 確立如何找到和使用技能",
+    "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always": "宣稱完成、修好、通過之前使用 — 必須跑驗證指令並確認輸出，證據先於宣稱",
+    "Use when you have a spec or requirements for a multi-step task, before touching code": "有規格或需求的多步驟任務，動手寫碼前先用這個規劃",
+    "Use when creating new skills, editing existing skills, or verifying skills work before deployment": "建立新技能、編輯現有技能、或部署前驗證技能時使用"
+  },
+
+  "gsd": {
+    "Add an idea to the backlog parking lot (999.x numbering)": "將想法加入待辦停車場（999.x 編號）",
+    "Add phase to end of current milestone in roadmap": "在路線圖當前里程碑末尾加入階段",
+    "Analyze codebase with parallel mapper agents to produce .planning/codebase/ documents": "用平行映射代理分析程式碼庫，產出 .planning/codebase/ 文件",
+    "Archive accumulated phase directories from completed milestones": "歸檔已完成里程碑的累積階段目錄",
+    "Archive completed milestone and prepare for next version": "歸檔已完成的里程碑並準備下個版本",
+    "Audit milestone completion against original intent before archiving": "歸檔前審計里程碑完成度是否符合原始意圖",
+    "Automatically advance to the next logical step in the GSD workflow": "自動推進到 GSD 流程的下一個邏輯步驟",
+    "Capture a forward-looking idea with trigger conditions — surfaces automatically at the right milestone": "捕捉前瞻性想法並設觸發條件 — 在適當的里程碑自動浮現",
+    "Capture idea or task as todo from current conversation context": "從當前對話上下文中捕捉想法或任務為待辦",
+    "Check project progress, show context, and route to next action (execute or plan)": "檢查專案進度、顯示上下文、導向下一步動作（執行或規劃）",
+    "Configure GSD workflow toggles and model profile": "配置 GSD 工作流程開關和模型設定檔",
+    "Create a clean PR branch by filtering out .planning/ commits — ready for code review": "過濾掉 .planning/ 提交來建立乾淨的 PR 分支 — 準備好接受代碼審查",
+    "Create an isolated workspace with repo copies and independent .planning/": "建立隔離的工作區，含倉庫副本和獨立的 .planning/",
+    "Create context handoff when pausing work mid-phase": "在階段中途暫停工作時建立上下文交接",
+    "Create detailed phase plan (PLAN.md) with verification loop": "建立詳細階段計畫（PLAN.md）含驗證迴圈",
+    "Create phases to close all gaps identified by milestone audit": "建立階段以關閉里程碑審計發現的所有缺口",
+    "Create PR, run review, and prepare for merge after verification passes": "建立 PR、執行審查、驗證通過後準備合併",
+    "Cross-phase audit of all outstanding UAT and verification items": "跨階段審計所有未完成的使用者驗收測試和驗證項目",
+    "Diagnose planning directory health and optionally repair issues": "診斷規劃目錄健康狀態並可選擇修復問題",
+    "Display project statistics — phases, plans, requirements, git metrics, and timeline": "顯示專案統計 — 階段、計畫、需求、Git 指標和時程",
+    "Execute a quick task with GSD guarantees (atomic commits, state tracking) but skip optional agents": "以 GSD 保證（原子提交、狀態追蹤）快速執行任務，跳過可選代理",
+    "Execute a trivial task inline — no subagents, no planning overhead": "行內執行瑣碎任務 — 不用子代理、不用規劃開銷",
+    "Execute all plans in a phase with wave-based parallelization": "以波次平行化執行階段中所有計畫",
+    "Gather phase context through adaptive questioning before planning. Use --auto to skip interactive questions (Claude picks recommended defaults).": "規劃前透過適應性提問收集階段上下文。用 --auto 跳過互動問題。",
+    "Generate a comprehensive project summary from milestone artifacts for team onboarding and review": "從里程碑產出物生成完整專案摘要，供團隊入門和審查",
+    "Generate a session report with token usage estimates, work summary, and outcomes": "生成會話報告，含 Token 用量估算、工作摘要和結果",
+    "Generate developer behavioral profile and create Claude-discoverable artifacts": "生成開發者行為剖面並建立 Claude 可發現的產出物",
+    "Generate tests for a completed phase based on UAT criteria and implementation": "根據驗收標準和實作為已完成階段生成測試",
+    "Generate UI design contract (UI-SPEC.md) for frontend phases": "為前端階段生成 UI 設計合約（UI-SPEC.md）",
+    "Initialize a new project with deep context gathering and PROJECT.md": "初始化新專案，深度收集上下文並建立 PROJECT.md",
+    "Insert urgent work as decimal phase (e.g., 72.1) between existing phases": "在現有階段間插入緊急工作為小數階段（如 72.1）",
+    "Interactive command center for managing multiple phases from one terminal": "從單一終端管理多個階段的互動式指揮中心",
+    "Join the GSD Discord community": "加入 GSD Discord 社群",
+    "List active GSD workspaces and their status": "列出活躍的 GSD 工作區及其狀態",
+    "List pending todos and select one to work on": "列出待辦事項並選擇一個來做",
+    "Manage parallel workstreams — list, create, switch, status, progress, complete, and resume": "管理平行工作流 — 列出、建立、切換、狀態、進度、完成和恢復",
+    "Manage persistent context threads for cross-session work": "管理跨會話工作的持久上下文線程",
+    "Post-mortem investigation for failed GSD workflows — analyzes git history, artifacts, and state to diagnose what went wrong": "失敗 GSD 工作流程的事後調查 — 分析 Git 歷史、產出物和狀態以診斷問題",
+    "Reapply local modifications after a GSD update": "GSD 更新後重新套用本地修改",
+    "Remove a future phase from roadmap and renumber subsequent phases": "從路線圖移除未來階段並重新編號後續階段",
+    "Remove a GSD workspace and clean up worktrees": "移除 GSD 工作區並清理工作樹",
+    "Request cross-AI peer review of phase plans from external AI CLIs": "向外部 AI CLI 請求階段計畫的跨 AI 同行審查",
+    "Research how to implement a phase (standalone - usually use /gsd:plan-phase instead)": "研究如何實作某階段（獨立使用 — 通常建議用 /gsd:plan-phase）",
+    "Resume work from previous session with full context restoration": "從上次會話恢復工作，完整還原上下文",
+    "Retroactive 6-pillar visual audit of implemented frontend code": "對已實作前端代碼的回溯性六支柱視覺審計",
+    "Retroactively audit and fill Nyquist validation gaps for a completed phase": "回溯審計並填補已完成階段的 Nyquist 驗證缺口",
+    "Review and promote backlog items to active milestone": "審查並將待辦項目提升至活躍里程碑",
+    "Route freeform text to the right GSD command automatically": "自動將自由文字導向正確的 GSD 指令",
+    "Run all remaining phases autonomously — discuss→plan→execute per phase": "自主執行所有剩餘階段 — 每階段：討論→規劃→執行",
+    "Show available GSD commands and usage guide": "顯示可用的 GSD 指令和使用指南",
+    "Start a new milestone cycle — update PROJECT.md and route to requirements": "開始新里程碑週期 — 更新 PROJECT.md 並導向需求",
+    "Surface Claude's assumptions about a phase approach before planning": "規劃前揭示 Claude 對階段方法的假設",
+    "Switch model profile for GSD agents (quality/balanced/budget/inherit)": "切換 GSD 代理的模型設定檔（品質/平衡/預算/繼承）",
+    "Systematic debugging with persistent state across context resets": "系統化除錯，跨上下文重置保持狀態",
+    "Update GSD to latest version with changelog display": "更新 GSD 至最新版本並顯示變更記錄",
+    "Validate built features through conversational UAT": "透過對話式使用者驗收測試驗證已建功能",
+    "Zero-friction idea capture. Append, list, or promote notes to todos.": "零摩擦捕捉靈感。新增、列出或將筆記提升為待辦。"
+  },
+
+  "user_skills": {
+    "Wu Browser": "悟瀏覽器",
+    "AI Browser Skill": "AI 瀏覽器技能",
+    "看懂專案結構再動手。Use when starting a new project, new feature, or when user says \"入神\" / \"看結構\" / \"庖丁解牛\". Also auto-trigger when the task involves building a new application, UI, server, or any user-facing deliverable.": "看懂專案結構再動手。新專案、新功能時使用，或用戶說「入神」「看結構」「庖丁解牛」時觸發。涉及建應用、UI、伺服器或用戶端交付物時自動觸發。"
+  },
+
+  "deprecated_superpowers": {
+    "Deprecated - use the superpowers:brainstorming skill instead": "已棄用 — 請改用 superpowers:brainstorming 技能",
+    "Deprecated - use the superpowers:writing-plans skill instead": "已棄用 — 請改用 superpowers:writing-plans 技能",
+    "Deprecated - use the superpowers:executing-plans skill instead": "已棄用 — 請改用 superpowers:executing-plans 技能"
+  },
+
+  "telegram": {
+    "Manage Telegram channel access — approve pairings, edit allowlists, set DM/group policy. Use when the user asks to pair, approve someone, check who's allowed, or change policy for the Telegram channel.": "管理 Telegram 頻道存取 — 批准配對、編輯允許清單、設定私訊/群組政策。",
+    "Set up the Telegram channel — save the bot token and review access policy. Use when the user pastes a Telegram bot token, asks to configure Telegram, asks \"how do I set this up\" or \"who can reach me,\" or wants to check channel status.": "設定 Telegram 頻道 — 儲存機器人 Token 並檢視存取政策。"
+  },
+
+  "other_commands": {
+    "Use this skill to configure the Claude Code harness via settings.json. Automated behaviors (\"from now on when X\", \"each time X\", \"whenever X\", \"before/after X\") require hooks configured in settings.json - the harness executes these, not Claude, so m…": "透過 settings.json 配置 Claude Code。自動行為需在 settings.json 中配置 hooks。",
+    "Use when the user wants to customize keyboard shortcuts, rebind keys, add chord bindings, or modify ~/.claude/keybindings.json. Examples: \"rebind ctrl+s\", \"add a chord shortcut\", \"change the submit key\", \"customize keybindings\".": "自訂鍵盤快捷鍵、重新綁定按鍵、新增組合鍵、或修改快捷鍵設定時使用。"
+  }
+}
