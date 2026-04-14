@@ -19,7 +19,7 @@
 
 ```bash
 git clone https://github.com/AlzcA/claude-zh-CN-win.git
-cd claude-code-i18n
+cd claude-zh-CN-win.git
 ```
 
 ### 第二步：安装依赖并构建
