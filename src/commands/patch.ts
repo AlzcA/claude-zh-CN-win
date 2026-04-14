@@ -61,9 +61,9 @@ async function askStar(): Promise<void> {
           const cmd = process.platform === 'darwin'
             ? `open "${REPO_URL}"`
             : process.platform === 'win32'
-              ? `cmd /c start "" "${REPO_URL}"`
+              ? `start "" "${REPO_URL}"`
               : `xdg-open "${REPO_URL}"`;
-          execSync(cmd, { stdio: 'ignore', timeout: 3000, shell: true });
+          execSync(cmd, { stdio: 'ignore', timeout: 3000 });
         } catch {
           console.log(chalk.dim(`  或手动前往：${REPO_URL}`));
         }
@@ -78,6 +78,7 @@ interface PatchOptions {
   lang?: string;
   technical?: boolean;
   reset?: boolean;
+  claudePath?: string;
 }
 
 export async function patchCommand(options: PatchOptions): Promise<void> {
@@ -86,7 +87,7 @@ export async function patchCommand(options: PatchOptions): Promise<void> {
   try {
     // 1. Find Claude Code
     spinner.start('Looking for Claude Code...');
-    const cc = await findClaudeCodeCli();
+    const cc = await findClaudeCodeCli(options.claudePath);
     spinner.succeed(`Found Claude Code v${cc.version}`);
 
     // 2. Determine locale

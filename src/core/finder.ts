@@ -58,6 +58,7 @@ export interface ClaudeCodeInfo {
 
 /**
  * Find Claude Code's cli.js by following the `claude` binary symlink.
+ * Also enhanced to detect Windows installations from various sources.
  */
 function findViaBinary(): string | null {
   const whichResult = findInPath('claude');
@@ -92,7 +93,29 @@ function findViaBinary(): string | null {
       if (fs.existsSync(nodeModulesCandidate)) {
         return nodeModulesCandidate;
       }
+      // Check for app.asar unpacked (Electron apps)
+      const asarCandidate = path.join(current, 'app.asar.unpacked', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js');
+      if (fs.existsSync(asarCandidate)) {
+        return asarCandidate;
+      }
       current = path.dirname(current);
+    }
+
+    // Windows: If it's a .cmd or .bat wrapper, try to find the target
+    if (process.platform === 'win32' && (whichResult.endsWith('.cmd') || whichResult.endsWith('.bat'))) {
+      try {
+        const content = fs.readFileSync(whichResult, 'utf-8');
+        // Look for paths in the batch file
+        const pathMatches = content.match(/"[^"]*claude-code[^"]*"/gi) || [];
+        for (const match of pathMatches) {
+          const extractedPath = match.replace(/"/g, '');
+          if (fs.existsSync(extractedPath)) {
+            return extractedPath;
+          }
+        }
+      } catch {
+        // Failed to read batch file
+      }
     }
   } catch {
     // realpath failed — return the original path, might be the cli.js
@@ -156,6 +179,7 @@ function findViaVolta(): string | null {
 
 /**
  * Scan common global node_modules paths.
+ * Enhanced for Windows to support all installation methods.
  */
 function findViaCommonPaths(): string | null {
   const home = os.homedir();
@@ -190,10 +214,11 @@ function findViaCommonPaths(): string | null {
     const drives = getWindowsDriveLetters();
     const appData = process.env.APPDATA || path.join(home, 'AppData', 'Roaming');
     const localAppData = process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local');
+    const username = os.userInfo().username;
 
-    // Per-drive paths (npm/pnpm/yarn global, scoop, etc.)
+    // Per-drive paths (npm/pnpm/yarn global, scoop, volta, etc.)
     for (const drive of drives) {
-      const driveHome = drive + '\\Users\\' + os.userInfo().username;
+      const driveHome = drive + '\\Users\\' + username;
 
       candidates.push(
         // npm global on this drive
@@ -202,12 +227,21 @@ function findViaCommonPaths(): string | null {
         path.join(driveHome, 'AppData', 'Roaming', 'npm', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
         // pnpm global
         path.join(driveHome, 'AppData', 'Roaming', 'pnpm', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+        // Yarn global
+        path.join(driveHome, 'AppData', 'Roaming', 'Yarn', 'Data', 'global', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
         // Scoop
-        path.join(driveHome, 'scoop', 'apps', 'claude-code', 'current'),
+        path.join(driveHome, 'scoop', 'apps', 'claude-code', 'current', 'cli.js'),
+        path.join(driveHome, 'scoop', 'apps', 'claude-code', 'current', 'resources', 'app', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
         // nvm-windows
         path.join(driveHome, 'AppData', 'Roaming', 'nvm', 'versions', 'node'),
         // Volta
         path.join(driveHome, '.volta', 'tools', 'image', 'node'),
+        // Official PowerShell installer locations
+        path.join(driveHome, '.claude', 'cli.js'),
+        path.join(driveHome, '.claude', 'local', 'cli.js'),
+        path.join(driveHome, '.claude', 'bin', 'cli.js'),
+        path.join(driveHome, 'AppData', 'Local', 'Programs', 'Claude Code', 'cli.js'),
+        path.join(driveHome, 'AppData', 'Local', 'Programs', 'claude-code', 'cli.js'),
       );
     }
 
@@ -225,10 +259,16 @@ function findViaCommonPaths(): string | null {
       // Chocolatey
       path.join(programFiles, 'Claude Code', 'resources', 'app', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
       path.join(programFilesX86, 'Claude Code', 'resources', 'app', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+      path.join(programFiles, 'ClaudeCode', 'cli.js'),
+      path.join(programFilesX86, 'ClaudeCode', 'cli.js'),
       // Direct install in AppData
       path.join(localAppData, 'Programs', 'claude-code', 'resources', 'app', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+      path.join(localAppData, 'Programs', 'Claude Code', 'cli.js'),
       // Winget default install location
+      path.join(localAppData, 'Microsoft', 'WindowsApps', 'ClaudeCode', 'cli.js'),
       path.join(localAppData, 'Microsoft', 'WindowsApps', 'claude', 'cli.js'),
+      // WindowsApps (symlink)
+      path.join(localAppData, 'Microsoft', 'WindowsApps', 'ClaudeCode_exe', 'cli.js'),
     );
   }
 
@@ -254,11 +294,88 @@ function readVersion(packageDir: string): string {
 }
 
 /**
+ * Find Claude Code installation path from Windows Registry.
+ * Checks both HKLM (system-wide) and HKCU (user-specific) installations.
+ */
+function findViaWindowsRegistry(): string | null {
+  if (process.platform !== 'win32') {
+    return null;
+  }
+
+  try {
+    // Try to query registry for Claude Code installation path
+    // Check HKLM (system-wide installs)
+    const registryCommands = [
+      // Official installer / winget
+      'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Anthropic\\ClaudeCode" /v InstallPath /reg:32',
+      'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Anthropic\\ClaudeCode" /v InstallPath /reg:64',
+      'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Anthropic\\ClaudeCode" /v InstallPath',
+      // Chocolatey
+      'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\ClaudeCode" /v InstallPath',
+      'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\ClaudeCode" /v InstallPath',
+      // User-specific installs (HKCU)
+      'reg query "HKEY_CURRENT_USER\\SOFTWARE\\Anthropic\\ClaudeCode" /v InstallPath',
+      'reg query "HKEY_CURRENT_USER\\SOFTWARE\\ClaudeCode" /v InstallPath',
+      // Uninstall registry keys (often contain install path)
+      'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ClaudeCode" /v InstallLocation',
+      'reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ClaudeCode" /v InstallLocation',
+      'reg query "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ClaudeCode" /v InstallLocation',
+    ];
+
+    for (const cmd of registryCommands) {
+      try {
+        const result = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
+        // Parse registry output to extract path
+        const match = result.match(/InstallPath\s+REG_SZ\s+(.+)/i) ||
+                     result.match(/InstallLocation\s+REG_SZ\s+(.+)/i) ||
+                     result.match(/InstallPath\s+REG_EXPAND_SZ\s+(.+)/i);
+        if (match && match[1]) {
+          const installPath = match[1].trim();
+          // Try various cli.js locations under the install path
+          const candidates = [
+            path.join(installPath, 'cli.js'),
+            path.join(installPath, 'resources', 'app', 'cli.js'),
+            path.join(installPath, 'resources', 'app', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+            path.join(installPath, 'resources', 'app.asar.unpacked', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+          ];
+          for (const candidate of candidates) {
+            if (fs.existsSync(candidate)) {
+              return candidate;
+            }
+          }
+        }
+      } catch {
+        // Registry key doesn't exist or command failed
+        continue;
+      }
+    }
+  } catch {
+    // Registry query failed
+  }
+
+  return null;
+}
+
+/**
  * Find via native installer paths (~/.claude/).
  * CC is migrating from npm to a native installer that may place cli.js here.
+ * Also supports Windows installations from:
+ * - Official PowerShell script (irm https://claude.ai/install.ps1 | iex)
+ * - Winget (winget install Anthropic.ClaudeCode)
+ * - Scoop (scoop install claude-code)
+ * - Chocolatey (choco install claude-code)
+ * - Native .exe installer
+ * - Portable versions
  */
 function findViaNativeInstaller(): string | null {
   const home = os.homedir();
+
+  // First check: direct path using os.homedir() (handles all user directory names)
+  const directPath = path.join(home, '.claude', 'cli.js');
+  if (fs.existsSync(directPath)) {
+    return directPath;
+  }
+
   const candidates: string[] = [
     // Unix common paths
     path.join(home, '.claude', 'local', 'cli.js'),
@@ -277,20 +394,30 @@ function findViaNativeInstaller(): string | null {
     const drives = getWindowsDriveLetters();
     const appData = process.env.APPDATA || path.join(home, 'AppData', 'Roaming');
     const localAppData = process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local');
+    const username = os.userInfo().username;
 
     // Per-drive paths (~/.claude, Documents, etc.)
     for (const drive of drives) {
-      const driveHome = drive + '\\Users\\' + os.userInfo().username;
-      const driveAppData = drive + '\\Users\\' + os.userInfo().username + '\\AppData\\Roaming';
-      const driveLocalAppData = drive + '\\Users\\' + os.userInfo().username + '\\AppData\\Local';
+      const driveHome = drive + '\\Users\\' + username;
+      const driveAppData = drive + '\\Users\\' + username + '\\AppData\\Roaming';
+      const driveLocalAppData = drive + '\\Users\\' + username + '\\AppData\\Local';
 
       candidates.push(
+        // Official PowerShell installer (irm https://claude.ai/install.ps1 | iex)
+        path.join(driveHome, '.claude', 'cli.js'),
+        path.join(driveHome, '.claude', 'local', 'cli.js'),
+        path.join(driveHome, '.claude', 'bin', 'cli.js'),
+        path.join(driveLocalAppData, 'Programs', 'Claude Code', 'cli.js'),
+        path.join(driveLocalAppData, 'Programs', 'claude-code', 'cli.js'),
         // Claude Code native Windows installer
         path.join(driveAppData, 'Claude', 'cli.js'),
         path.join(driveLocalAppData, 'Claude', 'cli.js'),
-        path.join(driveHome, '.claude', 'cli.js'),
         // Portable version in Documents
         path.join(driveHome, 'Documents', 'Claude Code', 'cli.js'),
+        path.join(driveHome, 'Documents', 'claude-code', 'cli.js'),
+        // Downloads (common for portable versions)
+        path.join(driveHome, 'Downloads', 'Claude Code', 'cli.js'),
+        path.join(driveHome, 'Downloads', 'claude-code', 'cli.js'),
       );
     }
 
@@ -299,15 +426,28 @@ function findViaNativeInstaller(): string | null {
     const programFilesX86 = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
 
     candidates.push(
-      // Official installer locations
+      // Official installer locations (winget, .exe)
       path.join(programFiles, 'Claude Code', 'resources', 'app', 'dist', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
       path.join(programFilesX86, 'Claude Code', 'resources', 'app', 'dist', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
       // Newer versions (electron-builder)
-      path.join(programFiles, 'Claude Code', 'resources', 'app.asar', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+      path.join(programFiles, 'Claude Code', 'resources', 'app.asar.unpacked', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+      path.join(programFilesX86, 'Claude Code', 'resources', 'app.asar.unpacked', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+      // Direct cli.js in Program Files
+      path.join(programFiles, 'Claude Code', 'cli.js'),
+      path.join(programFilesX86, 'Claude Code', 'cli.js'),
+      // Scoop installation
+      path.join(home, 'scoop', 'apps', 'claude-code', 'current', 'cli.js'),
+      path.join(home, 'scoop', 'apps', 'claude-code', 'current', 'resources', 'app', 'node_modules', '@anthropic-ai', 'claude-code', 'cli.js'),
+      // WindowsApps (winget)
+      path.join(localAppData, 'Microsoft', 'WindowsApps', 'ClaudeCode', 'cli.js'),
+      path.join(localAppData, 'Microsoft', 'WindowsApps', 'claude', 'cli.js'),
       // AppData paths
       path.join(appData, 'Claude', 'cli.js'),
       path.join(localAppData, 'Claude', 'cli.js'),
       path.join(home, '.claude', 'cli.js'),
+      // Chocolatey
+      path.join(programFiles, 'ClaudeCode', 'cli.js'),
+      path.join(programFilesX86, 'ClaudeCode', 'cli.js'),
     );
   }
 
@@ -316,28 +456,48 @@ function findViaNativeInstaller(): string | null {
       return candidate;
     }
   }
+
+  // Additional check: try to find from Windows registry (Windows only)
+  if (process.platform === 'win32') {
+    return findViaWindowsRegistry();
+  }
+
   return null;
 }
 
 /**
  * Find Claude Code's cli.js installation path.
  *
- * Search order:
- * 1. `which claude` → follow symlink
- * 2. Native installer paths (~/.claude/)
- * 3. `npm root -g` → @anthropic-ai/claude-code/cli.js
- * 4. ~/.volta/ scan
- * 5. Common global node_modules paths
+ * Search order (optimized for Windows):
+ * 1. Custom path from --claude-path option (if provided)
+ * 2. `which claude` → follow symlink (works for all installation methods)
+ * 3. Native installer paths (includes PowerShell installer: irm https://claude.ai/install.ps1 | iex)
+ * 4. Windows Registry (for .exe/winget/Chocolatey installs)
+ * 5. `npm root -g` → @anthropic-ai/claude-code/cli.js (npm/pnpm/yarn installs)
+ * 6. ~/.volta/ scan (Volta tool manager)
+ * 7. Common global node_modules paths (fallback)
  *
+ * @param customPath - Optional custom path from --claude-path option
  * @throws Error with installation instructions if not found
  */
-export async function findClaudeCodeCli(): Promise<ClaudeCodeInfo> {
+export async function findClaudeCodeCli(customPath?: string): Promise<ClaudeCodeInfo> {
+  // 1. Check custom path first (if provided)
+  if (customPath) {
+    const cliPath = customPath.endsWith('cli.js') ? customPath : path.join(customPath, 'cli.js');
+    if (fs.existsSync(cliPath)) {
+      const packageDir = path.dirname(cliPath);
+      const version = readVersion(packageDir);
+      return { cliPath, packageDir, version };
+    }
+    throw new Error(`Custom path not found: ${cliPath}`);
+  }
+
   const strategies = [
-    findViaBinary,
-    findViaNativeInstaller,
-    findViaNpmGlobal,
-    findViaVolta,
-    findViaCommonPaths,
+    findViaBinary,           // Highest priority: works for all methods if claude is in PATH
+    findViaNativeInstaller,  // PowerShell installer, winget, scoop, etc.
+    findViaNpmGlobal,        // npm/pnpm/yarn global installs
+    findViaVolta,            // Volta tool manager
+    findViaCommonPaths,      // Fallback: scan common paths
   ];
 
   for (const strategy of strategies) {
@@ -350,22 +510,26 @@ export async function findClaudeCodeCli(): Promise<ClaudeCodeInfo> {
   }
 
   const installInstructions = process.platform === 'win32'
-    ? 'Make sure Claude Code is installed:\n' +
-      '  npm install -g @anthropic-ai/claude-code\n' +
-      '  # OR via winget:\n' +
-      '  winget install Anthropic.ClaudeCode\n' +
-      '  # OR via scoop:\n' +
-      '  scoop install claude-code'
-    : 'Make sure Claude Code is installed globally:\n' +
+    ? 'Could not find Claude Code installation. Supported installation methods:\n\n' +
+      '【推荐】官方 PowerShell 安装器 (自动更新，适配 Windows):\n' +
+      '  irm https://claude.ai/install.ps1 | iex\n\n' +
+      '其他安装方式:\n' +
+      '  • Winget:        winget install Anthropic.ClaudeCode\n' +
+      '  • npm 全局:      npm install -g @anthropic-ai/claude-code\n' +
+      '  • Scoop:         scoop install claude-code\n' +
+      '  • Chocolatey:    choco install claude-code\n' +
+      '  • 下载安装器:    https://claude.ai/download\n\n' +
+      '安装完成后请重新运行: cc-i18n patch --lang zh-CN'
+    : 'Could not find Claude Code installation.\n\n' +
+      'Make sure Claude Code is installed:\n' +
       '  npm install -g @anthropic-ai/claude-code\n\n' +
       'If installed via Volta:\n' +
-      '  volta install @anthropic-ai/claude-code';
+      '  volta install @anthropic-ai/claude-code\n\n' +
+      'Or download the native installer from:\n' +
+      '  https://claude.ai/download\n\n' +
+      'Then try again: cc-i18n patch --lang zh-CN';
 
-  throw new Error(
-    'Could not find Claude Code installation.\n\n' +
-    installInstructions + '\n\n' +
-    'Then try again: cc-i18n patch --lang zh-CN'
-  );
+  throw new Error(installInstructions);
 }
 
 /**

@@ -23,6 +23,7 @@ program
   .option('--lang <locale>', 'Target language locale (e.g. zh-TW, zh-CN, en)')
   .option('--technical', 'Use technical/professional translation variant')
   .option('--reset', 'Re-select language (ignore saved preference)')
+  .option('--claude-path <path>', 'Manually specify Claude Code cli.js installation path')
   .action(patchCommand);
 
 program

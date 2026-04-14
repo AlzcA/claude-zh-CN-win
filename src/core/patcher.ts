@@ -1552,6 +1552,14 @@ function getPostPatchRules(locale: string): PostPatchRule[] {
         search: '"Run /init to create a CLAUDE.md file with instructions for Claude"',
         replace: '"运行 /init 为 Claude 创建 CLAUDE.md 说明文件"',
       },
+      {
+        search: '# MCP Server Instructions',
+        replace: '# MCP 服务器说明',
+      },
+      {
+        search: 'The following MCP servers have provided instructions for how to use their tools and resources:',
+        replace: '以下 MCP 服务器提供了如何使用其工具和资源的说明：',
+      },
       // ── Home directory launch warning ──
       {
         search: '"Note: You have launched claude in your home directory. For the best experience, launch it in a project directory instead."',
@@ -1568,7 +1576,19 @@ function getPostPatchRules(locale: string): PostPatchRule[] {
       },
       {
         search: '"Set the AI model for Claude Code (currently MiniMax-M2.5)"',
-        replace: '"为 Claude Code 设置 AI 模型（当前为 MiniMax-M2.5）"',
+        replace: '"设置 Claude Code 使用的 AI 模型（当前为 MiniMax-M2.5）"',
+      },
+      {
+        search: '"Set the AI model for Claude Code (currently Sonnet 4.6)"',
+        replace: '"设置 Claude Code 使用的 AI 模型（当前为 Sonnet 4.6）"',
+      },
+      {
+        search: '"Configure the Advisor Tool to consult a stronger model for guidance at key moments during a task"',
+        replace: '"配置顾问工具，在任务关键时刻调用更强模型提供指导"',
+      },
+      {
+        search: '"Help teammates ramp on Claude Code with a guide from your usage"',
+        replace: '"根据你的使用习惯生成指南，帮助队友快速上手 Claude Code"',
       },
       {
         search: '"Discover Claude Code features through quick interactive lessons"',
@@ -1994,11 +2014,11 @@ function getPostPatchRules(locale: string): PostPatchRule[] {
       },
       {
         search: '" to toggle tasks"',
-        replace: '" 切换任务"',
+        replace: '" 开关任务面板"',
       },
       {
         search: '" to undo"',
-        replace: '" 撤销"',
+        replace: '" 撤销操作"',
       },
       {
         search: '"ctrl + z 暂停"',
@@ -2006,11 +2026,11 @@ function getPostPatchRules(locale: string): PostPatchRule[] {
       },
       {
         search: '" to paste images"',
-        replace: '" 粘贴图片"',
+        replace: '" to 粘贴图片"',
       },
       {
         search: '" to switch model"',
-        replace: '" 切换模型"',
+        replace: '" to 切换模型"',
       },
       {
         search: '" to toggle fast mode"',
@@ -2018,11 +2038,11 @@ function getPostPatchRules(locale: string): PostPatchRule[] {
       },
       {
         search: '" to stash prompt"',
-        replace: '" 暂存提示"',
+        replace: '" 暂存提示词"',
       },
       {
         search: '" in $EDITOR"',
-        replace: '" 在 $EDITOR 中编辑"',
+        replace: '" 在编辑器中编辑"',
       },
       {
         search: '"/keybindings to customize"',
@@ -2239,21 +2259,17 @@ export async function applyPatch(
  */
 async function validateSyntax(cliPath: string): Promise<boolean> {
   try {
-    // Windows needs quotes handled differently for cmd
-    if (process.platform === 'win32') {
-      execSync(`node --check "${cliPath}"`, {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-        timeout: 30000,
-        shell: true,
-      });
-    } else {
-      execSync(`node --check "${cliPath}"`, {
-        encoding: 'utf-8',
-        stdio: 'pipe',
-        timeout: 30000,
-      });
-    }
+    // Use node --check to validate JavaScript syntax
+    // On Windows, we need to handle paths with spaces properly
+    const checkCmd = process.platform === 'win32'
+      ? `node --check "${cliPath}"`
+      : `node --check "${cliPath}"`;
+
+    execSync(checkCmd, {
+      encoding: 'utf-8',
+      stdio: 'pipe',
+      timeout: 30000,
+    });
     return true;
   } catch {
     return false;
