@@ -18,7 +18,7 @@
 ### 第一步：克隆仓库
 
 ```bash
-git clone https://github.com/joshchaotang/claude-code-i18n.git
+git clone https://github.com/AlzcA/claude-zh-CN-win.git
 cd claude-code-i18n
 ```
 
